@@ -17,6 +17,7 @@ export default function RootLayout({ children }) {
             <nav style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               <a href="/" style={linkStyle}>🏠 Inicio</a>
               <a href="/clientes" style={linkStyle}>👥 Clientes</a>
+              <a href="/materiales" style={linkStyle}>📦 Materiales</a>
             </nav>
           </aside>
           <main style={{ flex: 1, background: "#f4f5f7", padding: 40, color: "#1a1a1a" }}>
