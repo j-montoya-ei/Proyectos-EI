@@ -21,6 +21,7 @@ export default function RootLayout({ children }) {
               <a href="/recursos-mo" style={linkStyle}>🔧 Mano de Obra</a>
               <a href="/transporte" style={linkStyle}>🚚 Transporte</a>
               <a href="/viaticos" style={linkStyle}>🍽️ Viáticos</a>
+              <a href="/equipo" style={linkStyle}>🛠️ Equipo y herramienta</a>
             </nav>
           </aside>
           <main style={{ flex: 1, background: "#f4f5f7", padding: 40, color: "#1a1a1a" }}>
