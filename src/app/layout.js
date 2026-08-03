@@ -18,6 +18,7 @@ export default function RootLayout({ children }) {
               <a href="/" style={linkStyle}>🏠 Inicio</a>
               <a href="/clientes" style={linkStyle}>👥 Clientes</a>
               <a href="/materiales" style={linkStyle}>📦 Materiales</a>
+              <a href="/recursos-mo" style={linkStyle}>🔧 Mano de Obra</a>
             </nav>
           </aside>
           <main style={{ flex: 1, background: "#f4f5f7", padding: 40, color: "#1a1a1a" }}>
