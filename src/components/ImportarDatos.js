@@ -37,7 +37,7 @@ export default function ImportarDatos({ tabla, columnas, onImport }) {
       const ws = wb.Sheets[wb.SheetNames[0]];
       const filasRaw = XLSX.utils.sheet_to_json(ws, { defval: "" });
 
-      const primerTexto = columnas.find((c) => c.tipo === "texto")?.campo;
+      const camposTexto = columnas.filter((c) => c.tipo === "texto").map((c) => c.campo);
 
       const filas = filasRaw
         .map((r) => {
@@ -48,7 +48,7 @@ export default function ImportarDatos({ tabla, columnas, onImport }) {
           }
           return obj;
         })
-        .filter((r) => !primerTexto || r[primerTexto]);
+        .filter((r) => camposTexto.length === 0 || camposTexto.some((c) => r[c]));
 
       if (filas.length === 0) {
         alert(
