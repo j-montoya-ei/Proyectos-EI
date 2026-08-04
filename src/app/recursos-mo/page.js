@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
+import ImportarDatos from "../../components/ImportarDatos";
 
 export default function RecursosMoPage() {
   const [recursos, setRecursos] = useState([]);
