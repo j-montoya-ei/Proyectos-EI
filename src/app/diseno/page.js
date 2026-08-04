@@ -73,6 +73,9 @@ export default function DisenoPage() {
         Diseño y trámites
       </h1>
 
+<ImportarDatos tabla="diseno" onImport={cargar}
+  columnas={[{ campo: "descripcion", tipo: "texto" }, { campo: "ume", tipo: "texto" }, { campo: "costo", tipo: "numero" }]} />
+          
       <div className="bg-white border rounded-lg p-4 mb-6 flex flex-wrap gap-3 items-end">
         <div>
           <label className="block text-sm text-gray-600 mb-1">Descripción *</label>
