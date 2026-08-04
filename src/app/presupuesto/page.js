@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 
 export default function PresupuestosPage() {
-  const [presupuesto, setPresupuesto] = useState([]);
+  const [presupuestos, setPresupuestos] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [form, setForm] = useState({ cliente_id: "", nombre: "" });
   const [cargando, setCargando] = useState(true);
@@ -17,10 +17,10 @@ export default function PresupuestosPage() {
   async function cargar() {
     setCargando(true);
     const { data, error } = await supabase
-      .from("presupuesto")
+      .from("presupuestos")
       .select("*, clientes(nombre)")
       .order("created_at", { ascending: false });
-    if (!error) setPresupuesto(data);
+    if (!error) setPresupuestos(data);
     setCargando(false);
   }
 
@@ -32,7 +32,7 @@ export default function PresupuestosPage() {
   async function crear() {
     if (!form.cliente_id) return alert("Elige un cliente");
     if (!form.nombre) return alert("El nombre del presupuesto es obligatorio");
-    await supabase.from("presupuesto").insert({
+    await supabase.from("presupuestos").insert({
       cliente_id: Number(form.cliente_id),
       nombre: form.nombre,
     });
@@ -42,14 +42,14 @@ export default function PresupuestosPage() {
 
   async function eliminar(id) {
     if (!confirm("¿Eliminar este presupuesto y todas sus líneas?")) return;
-    await supabase.from("presupuesto").delete().eq("id", id);
+    await supabase.from("presupuestos").delete().eq("id", id);
     cargar();
   }
 
   return (
     <div className="p-8">
       <h1 className="text-2xl font-bold mb-6" style={{ color: "#00369C" }}>
-        Presupuesto
+        Presupuestos
       </h1>
 
       {/* Formulario */}
@@ -101,10 +101,10 @@ export default function PresupuestosPage() {
               </tr>
             </thead>
             <tbody>
-              {presupuesto.map((p) => (
+              {presupuestos.map((p) => (
                 <tr key={p.id} className="border-t hover:bg-gray-50">
                   <td className="px-4 py-2 font-medium">{p.nombre}</td>
-                  <td className="px-4 py-2">{p.clientes?.nombre || "—"}</td>
+                  <td className="px-4 py-2">{p.clientes?.nombre || "\u2014"}</td>
                   <td className="px-4 py-2 text-center whitespace-nowrap">
                     <a
                       href={`/presupuesto/${p.id}`}
@@ -122,10 +122,10 @@ export default function PresupuestosPage() {
                   </td>
                 </tr>
               ))}
-              {presupuesto.length === 0 && (
+              {presupuestos.length === 0 && (
                 <tr>
                   <td colSpan={3} className="px-4 py-6 text-center text-gray-500">
-                    Sin presupuesto aún.
+                    Sin presupuestos a\u00fan.
                   </td>
                 </tr>
               )}
