@@ -76,6 +76,8 @@ export default function RecursosMoPage() {
       <h1 className="text-2xl font-bold mb-6" style={{ color: "#00369C" }}>
         Mano de Obra
       </h1>
+<ImportarDatos tabla="recursos_mo" onImport={cargarRecursos}
+  columnas={[{ campo: "codigo", tipo: "texto" }, { campo: "cargo", tipo: "texto" }, { campo: "costo_mensual", tipo: "numero" }]} />
 
       {/* Formulario */}
       <div className="bg-white border rounded-lg p-4 mb-6 flex flex-wrap gap-3 items-end">
