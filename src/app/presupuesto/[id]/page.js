@@ -135,12 +135,12 @@ export default function ArmarPresupuestoPage() {
     setBusqG(texto);
     if (!texto || texto.length < 2) return setResG([]);
     const [{ data: v }, { data: t }] = await Promise.all([
-      supabase.from("viaticos").select("id, descripcion, valor_un").ilike("descripcion", `%${texto}%`).limit(8),
+      supabase.from("viaticos").select("id, descripcion, valor_un, personas").ilike("descripcion", `%${texto}%`).limit(8),
       supabase.from("transporte").select("id, descripcion, valor_un").ilike("descripcion", `%${texto}%`).limit(8),
     ]);
     setResG([
-      ...(v || []).map((r) => ({ ...r, origen: "viatico" })),
-      ...(t || []).map((r) => ({ ...r, origen: "transporte" })),
+      ...(v || []).map((r) => ({ ...r, origen: "viatico", costo: (r.valor_un || 0) * (r.personas ?? 1) })),
+      ...(t || []).map((r) => ({ ...r, origen: "transporte", costo: r.valor_un || 0 })),
     ]);
   }
 
@@ -150,7 +150,7 @@ export default function ArmarPresupuestoPage() {
       origen: item.origen,
       descripcion: item.descripcion,
       cantidad: 1,
-      valor_unitario: item.valor_un || 0,
+      valor_unitario: item.costo || 0,
     });
     setBusqG("");
     setResG([]);
@@ -304,7 +304,7 @@ export default function ArmarPresupuestoPage() {
               <div key={item.origen + item.id} onClick={() => agregarGen(item)}
                 className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex justify-between text-sm">
                 <span><span className="text-gray-400 mr-2">[{item.origen}]</span>{item.descripcion}</span>
-                <span className="text-gray-500">{formato(item.valor_un)}</span>
+                <span className="text-gray-500">{formato(item.costo)}</span>
               </div>
             ))}
           </div>
