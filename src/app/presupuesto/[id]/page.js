@@ -208,6 +208,13 @@ export default function ArmarPresupuestoPage() {
         {pres.nombre}
       </h1>
       <p className="text-gray-500 mb-6">Cliente: {pres.clientes?.nombre || "—"}</p>
+      <a
+        href={`/presupuesto/${presId}/oferta`}
+        className="inline-block mb-6 px-4 py-2 rounded font-semibold text-white"
+        style={{ backgroundColor: "#00369C" }}
+      >
+        📄 Generar oferta técnico-comercial
+      </a>
 
       {/* Porcentajes globales */}
       <div className="bg-white border rounded-lg p-4 mb-6 flex flex-wrap gap-4 items-end">
