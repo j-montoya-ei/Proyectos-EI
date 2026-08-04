@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
+import ImportarDatos from "../../components/ImportarDatos";
 
 export default function DisenoPage() {
   const [items, setItems] = useState([]);
