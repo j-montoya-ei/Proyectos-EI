@@ -7,7 +7,7 @@ import ImportarDatos from "../../components/ImportarDatos";
 export default function RecursosMoPage() {
   const [recursos, setRecursos] = useState([]);
   const [busqueda, setBusqueda] = useState("");
-  const [form, setForm] = useState({ codigo: "", cargo: "", costo_mensual: "" });
+  const [form, setForm] = useState({ codigo: "", cargo: "", salario_base: "", costo_mensual: "" });
   const [editId, setEditId] = useState(null);
   const [cargando, setCargando] = useState(true);
 
@@ -30,6 +30,7 @@ export default function RecursosMoPage() {
     const payload = {
       codigo: form.codigo,
       cargo: form.cargo,
+      salario_base: Number(form.salario_base) || 0,
       costo_mensual: Number(form.costo_mensual) || 0,
     };
     if (editId) {
@@ -37,7 +38,7 @@ export default function RecursosMoPage() {
     } else {
       await supabase.from("recursos_mo").insert(payload);
     }
-    setForm({ codigo: "", cargo: "", costo_mensual: "" });
+    setForm({ codigo: "", cargo: "", salario_base: "", costo_mensual: "" });
     setEditId(null);
     cargarRecursos();
   }
@@ -47,6 +48,7 @@ export default function RecursosMoPage() {
     setForm({
       codigo: r.codigo || "",
       cargo: r.cargo || "",
+      salario_base: r.salario_base || "",
       costo_mensual: r.costo_mensual || "",
     });
   }
@@ -59,7 +61,7 @@ export default function RecursosMoPage() {
 
   function cancelar() {
     setEditId(null);
-    setForm({ codigo: "", cargo: "", costo_mensual: "" });
+    setForm({ codigo: "", cargo: "", salario_base: "", costo_mensual: "" });
   }
 
   const formato = (n) =>
@@ -76,8 +78,16 @@ export default function RecursosMoPage() {
       <h1 className="text-2xl font-bold mb-6" style={{ color: "#00369C" }}>
         Mano de Obra
       </h1>
-<ImportarDatos tabla="recursos_mo" onImport={cargarRecursos}
-  columnas={[{ campo: "codigo", tipo: "texto" }, { campo: "cargo", tipo: "texto" }, { campo: "costo_mensual", tipo: "numero" }]} />
+      <ImportarDatos
+        tabla="recursos_mo"
+        onImport={cargarRecursos}
+        columnas={[
+          { campo: "codigo", tipo: "texto" },
+          { campo: "cargo", tipo: "texto" },
+          { campo: "salario_base", tipo: "numero" },
+          { campo: "costo_mensual", tipo: "numero" },
+        ]}
+      />
 
       {/* Formulario */}
       <div className="bg-white border rounded-lg p-4 mb-6 flex flex-wrap gap-3 items-end">
@@ -97,6 +107,16 @@ export default function RecursosMoPage() {
             value={form.cargo}
             onChange={(e) => setForm({ ...form, cargo: e.target.value })}
             placeholder="Ej: Ingeniero"
+          />
+        </div>
+        <div>
+          <label className="block text-sm text-gray-600 mb-1">Base salarial</label>
+          <input
+            type="number"
+            className="border rounded px-3 py-2"
+            value={form.salario_base}
+            onChange={(e) => setForm({ ...form, salario_base: e.target.value })}
+            placeholder="0"
           />
         </div>
         <div>
@@ -145,6 +165,7 @@ export default function RecursosMoPage() {
               <tr>
                 <th className="px-4 py-2 text-left">Código</th>
                 <th className="px-4 py-2 text-left">Cargo</th>
+                <th className="px-4 py-2 text-right">Base salarial</th>
                 <th className="px-4 py-2 text-right">Costo mensual</th>
                 <th className="px-4 py-2 text-right">Costo diario (÷24)</th>
                 <th className="px-4 py-2 text-center">Acciones</th>
@@ -155,6 +176,7 @@ export default function RecursosMoPage() {
                 <tr key={r.id} className="border-t hover:bg-gray-50">
                   <td className="px-4 py-2">{r.codigo}</td>
                   <td className="px-4 py-2 font-medium">{r.cargo}</td>
+                  <td className="px-4 py-2 text-right">{formato(r.salario_base)}</td>
                   <td className="px-4 py-2 text-right">{formato(r.costo_mensual)}</td>
                   <td className="px-4 py-2 text-right" style={{ color: "#00369C", fontWeight: 600 }}>
                     {formato(r.costo_mensual / 24)}
@@ -178,7 +200,7 @@ export default function RecursosMoPage() {
               ))}
               {filtrados.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-gray-500">
+                  <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
                     Sin recursos aún.
                   </td>
                 </tr>
