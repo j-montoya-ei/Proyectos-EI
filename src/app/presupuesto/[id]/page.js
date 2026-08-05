@@ -73,6 +73,64 @@ export default function ArmarPresupuestoPage() {
     alert("Porcentajes guardados.");
   }
 
+  async function guardarVersion() {
+    if (!confirm("Se guardará una foto (versión) del presupuesto actual. ¿Continuar?")) return;
+
+    const { data: prev } = await supabase
+      .from("presupuesto_versiones")
+      .select("version")
+      .eq("presupuesto_id", presId)
+      .order("version", { ascending: false })
+      .limit(1);
+    const nuevaVersion = (prev?.[0]?.version || 0) + 1;
+
+    const o = Number(cfg.ot) / 100 || 0;
+    const i = Number(cfg.iva) / 100 || 0;
+    const u = Number(cfg.ue) / 100 || 0;
+    const calcL = (base, cant) => {
+      const cu = base * (1 + o) * (1 + i);
+      const vu = u < 1 ? (cu * (1 + o) * (1 + i)) / (1 - u) : 0;
+      return { cu, ct: cu * cant, vu, vt: vu * cant };
+    };
+
+    const apusSnap = lineas.map((l) => {
+      const r = calcL(l.costo_unitario, l.cantidad);
+      return {
+        descripcion: `${l.apus?.codigo || ""} · ${l.apus?.descripcion || ""}`,
+        cantidad: l.cantidad,
+        costo_unit: r.cu,
+        costo_total: r.ct,
+        valor_unit: r.vu,
+        valor_total: r.vt,
+      };
+    });
+    const genSnap = gen.map((g) => {
+      const r = calcL(g.valor_unitario, g.cantidad);
+      return {
+        descripcion: g.descripcion,
+        origen: g.origen,
+        cantidad: g.cantidad,
+        costo_unit: r.cu,
+        costo_total: r.ct,
+        valor_unit: r.vu,
+        valor_total: r.vt,
+      };
+    });
+
+    const tc = [...apusSnap, ...genSnap].reduce((s, x) => s + x.costo_total, 0);
+    const tv = [...apusSnap, ...genSnap].reduce((s, x) => s + x.valor_total, 0);
+
+    await supabase.from("presupuesto_versiones").insert({
+      presupuesto_id: presId,
+      version: nuevaVersion,
+      nombre: pres.nombre,
+      total_costo: tc,
+      total_valor: tv,
+      datos: { ot: o, iva: i, ue: u, apus: apusSnap, generales: genSnap, oferta: pres.oferta || null },
+    });
+    alert(`Versión V${nuevaVersion} guardada.`);
+  }
+
   // ---- APUs ----
   async function buscar(texto) {
     setBusq(texto);
@@ -208,13 +266,30 @@ export default function ArmarPresupuestoPage() {
         {pres.nombre}
       </h1>
       <p className="text-gray-500 mb-6">Cliente: {pres.clientes?.nombre || "—"}</p>
-      <a
-        href={`/presupuesto/${presId}/oferta`}
-        className="inline-block mb-6 px-4 py-2 rounded font-semibold text-white"
-        style={{ backgroundColor: "#00369C" }}
-      >
-        📄 Generar oferta técnico-comercial
-      </a>
+
+      <div className="flex flex-wrap gap-3 mb-6">
+        
+          href={`/presupuesto/${presId}/oferta`}
+          className="inline-block px-4 py-2 rounded font-semibold text-white"
+          style={{ backgroundColor: "#00369C" }}
+        >
+          📄 Generar oferta técnico-comercial
+        </a>
+        <button
+          onClick={guardarVersion}
+          className="px-4 py-2 rounded font-semibold"
+          style={{ backgroundColor: "#F6D000" }}
+        >
+          💾 Guardar versión
+        </button>
+        
+          href={`/presupuesto/${presId}/versiones`}
+          className="inline-block px-4 py-2 rounded font-semibold text-white"
+          style={{ backgroundColor: "#A4A8AB" }}
+        >
+          🕘 Ver versiones
+        </a>
+      </div>
 
       {/* Porcentajes globales */}
       <div className="bg-white border rounded-lg p-4 mb-6 flex flex-wrap gap-4 items-end">
