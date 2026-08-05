@@ -254,19 +254,25 @@ export default function OfertaPage() {
         .salto { height: 20px; }
 
         @media print {
-          @page { size: letter; margin: 3.1cm 2cm 2cm 2.4cm; }
-          body { margin: 0; }
+          @page { size: letter; margin: 3.6cm 2cm 2.5cm 2.4cm; }
+          html, body { margin: 0 !important; }
           .no-print { display: none !important; }
           .membrete {
             display: block;
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: -3.6cm;
+            left: -2.4cm;
+            width: 21.59cm;
+            height: 27.94cm;
             z-index: 0;
           }
           .hoja { position: relative; z-index: 1; max-width: none; font-size: 12px; }
           .salto { page-break-before: always; height: 0; }
           .economica { font-size: 10px; }
+          .economica thead th, .economica tr.tot td {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
         }
       `}</style>
     </div>
