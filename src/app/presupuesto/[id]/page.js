@@ -74,7 +74,7 @@ export default function ArmarPresupuestoPage() {
   }
 
   async function guardarVersion() {
-    if (!confirm("Se guardará una foto (versión) del presupuesto actual. ¿Continuar?")) return;
+    if (!confirm("Se guardara una foto (version) del presupuesto actual. Continuar?")) return;
 
     const { data: prev } = await supabase
       .from("presupuesto_versiones")
@@ -96,7 +96,7 @@ export default function ArmarPresupuestoPage() {
     const apusSnap = lineas.map((l) => {
       const r = calcL(l.costo_unitario, l.cantidad);
       return {
-        descripcion: `${l.apus?.codigo || ""} · ${l.apus?.descripcion || ""}`,
+        descripcion: `${l.apus?.codigo || ""} - ${l.apus?.descripcion || ""}`,
         cantidad: l.cantidad,
         costo_unit: r.cu,
         costo_total: r.ct,
@@ -128,7 +128,7 @@ export default function ArmarPresupuestoPage() {
       total_valor: tv,
       datos: { ot: o, iva: i, ue: u, apus: apusSnap, generales: genSnap, oferta: pres.oferta || null },
     });
-    alert(`Versión V${nuevaVersion} guardada.`);
+    alert(`Version V${nuevaVersion} guardada.`);
   }
 
   // ---- APUs ----
@@ -174,7 +174,7 @@ export default function ArmarPresupuestoPage() {
   }
 
   async function actualizarCostos() {
-    if (!confirm("Refrescará el costo congelado de cada APU con sus líneas actuales. ¿Continuar?"))
+    if (!confirm("Refrescara el costo congelado de cada APU con sus lineas actuales. Continuar?"))
       return;
     for (const l of lineas) {
       const { data: lins } = await supabase
@@ -188,7 +188,7 @@ export default function ArmarPresupuestoPage() {
     alert("Costos actualizados.");
   }
 
-  // ---- Generales (viáticos + transporte) ----
+  // ---- Generales (viaticos + transporte) ----
   async function buscarGen(texto) {
     setBusqG(texto);
     if (!texto || texto.length < 2) return setResG([]);
@@ -216,7 +216,7 @@ export default function ArmarPresupuestoPage() {
   }
 
   async function agregarManual() {
-    if (!manual.descripcion) return alert("Escribe una descripción");
+    if (!manual.descripcion) return alert("Escribe una descripcion");
     await supabase.from("presupuesto_generales").insert({
       presupuesto_id: presId,
       origen: "manual",
@@ -260,34 +260,34 @@ export default function ArmarPresupuestoPage() {
   return (
     <div className="p-8">
       <a href="/presupuesto" className="text-sm" style={{ color: "#00369C" }}>
-        ← Volver a Presupuestos
+        Volver a Presupuestos
       </a>
       <h1 className="text-2xl font-bold mt-2 mb-1" style={{ color: "#00369C" }}>
         {pres.nombre}
       </h1>
-      <p className="text-gray-500 mb-6">Cliente: {pres.clientes?.nombre || "—"}</p>
+      <p className="text-gray-500 mb-6">Cliente: {pres.clientes?.nombre || "-"}</p>
 
       <div className="flex flex-wrap gap-3 mb-6">
-        
+        <a
           href={`/presupuesto/${presId}/oferta`}
           className="inline-block px-4 py-2 rounded font-semibold text-white"
           style={{ backgroundColor: "#00369C" }}
         >
-          📄 Generar oferta técnico-comercial
+          Generar oferta tecnico-comercial
         </a>
         <button
           onClick={guardarVersion}
           className="px-4 py-2 rounded font-semibold"
           style={{ backgroundColor: "#F6D000" }}
         >
-          💾 Guardar versión
+          Guardar version
         </button>
-        
+        <a
           href={`/presupuesto/${presId}/versiones`}
           className="inline-block px-4 py-2 rounded font-semibold text-white"
           style={{ backgroundColor: "#A4A8AB" }}
         >
-          🕘 Ver versiones
+          Ver versiones
         </a>
       </div>
 
@@ -316,14 +316,14 @@ export default function ArmarPresupuestoPage() {
 
       {/* Buscador de APUs */}
       <div className="relative mb-4">
-        <input className="border rounded px-3 py-2 w-full" placeholder="Buscar APU por código o descripción..."
+        <input className="border rounded px-3 py-2 w-full" placeholder="Buscar APU por codigo o descripcion..."
           value={busq} onChange={(e) => buscar(e.target.value)} />
         {resultados.length > 0 && (
           <div className="absolute z-10 bg-white border rounded w-full mt-1 max-h-60 overflow-y-auto shadow">
             {resultados.map((a) => (
               <div key={a.id} onClick={() => agregar(a)}
                 className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm">
-                {a.codigo} · {a.descripcion}
+                {a.codigo} - {a.descripcion}
               </div>
             ))}
           </div>
@@ -349,7 +349,7 @@ export default function ArmarPresupuestoPage() {
               const r = calc(l.costo_unitario, l.cantidad);
               return (
                 <tr key={l.id} className="border-t hover:bg-gray-50">
-                  <td className="px-3 py-2 font-medium">{l.apus?.codigo} · {l.apus?.descripcion}</td>
+                  <td className="px-3 py-2 font-medium">{l.apus?.codigo} - {l.apus?.descripcion}</td>
                   <td className="px-3 py-2 text-right">
                     <input type="number" defaultValue={l.cantidad}
                       onBlur={(e) => cambiarCantidad(l.id, e.target.value)}
@@ -360,13 +360,13 @@ export default function ArmarPresupuestoPage() {
                   <td className="px-3 py-2 text-right">{formato(r.valorUnit)}</td>
                   <td className="px-3 py-2 text-right font-medium" style={{ color: "#00369C" }}>{formato(r.valorTotal)}</td>
                   <td className="px-3 py-2 text-center">
-                    <button onClick={() => eliminarLinea(l.id)} className="text-red-600 font-bold px-2">✕</button>
+                    <button onClick={() => eliminarLinea(l.id)} className="text-red-600 font-bold px-2">X</button>
                   </td>
                 </tr>
               );
             })}
             {lineas.length === 0 && (
-              <tr><td colSpan={7} className="px-3 py-6 text-center text-gray-500">Sin APUs aún. Búscalas arriba.</td></tr>
+              <tr><td colSpan={7} className="px-3 py-6 text-center text-gray-500">Sin APUs aun. Buscalas arriba.</td></tr>
             )}
           </tbody>
         </table>
@@ -374,11 +374,11 @@ export default function ArmarPresupuestoPage() {
 
       {/* Costos generales */}
       <h2 className="text-lg font-bold mb-3" style={{ color: "#00369C" }}>
-        Costos generales (viáticos y transporte)
+        Costos generales (viaticos y transporte)
       </h2>
 
       <div className="relative mb-3">
-        <input className="border rounded px-3 py-2 w-full" placeholder="Buscar en viáticos y transporte..."
+        <input className="border rounded px-3 py-2 w-full" placeholder="Buscar en viaticos y transporte..."
           value={busqG} onChange={(e) => buscarGen(e.target.value)} />
         {resG.length > 0 && (
           <div className="absolute z-10 bg-white border rounded w-full mt-1 max-h-60 overflow-y-auto shadow">
@@ -396,7 +396,7 @@ export default function ArmarPresupuestoPage() {
       {/* Entrada manual */}
       <div className="bg-white border rounded-lg p-3 mb-4 flex flex-wrap gap-3 items-end">
         <div className="flex-1 min-w-[200px]">
-          <label className="block text-sm text-gray-600 mb-1">Descripción (manual)</label>
+          <label className="block text-sm text-gray-600 mb-1">Descripcion (manual)</label>
           <input className="border rounded px-3 py-2 w-full" value={manual.descripcion}
             onChange={(e) => setManual({ ...manual, descripcion: e.target.value })}
             placeholder="Ej: Combustible obra" />
@@ -443,13 +443,13 @@ export default function ArmarPresupuestoPage() {
                   <td className="px-3 py-2 text-right">{formato(r.valorUnit)}</td>
                   <td className="px-3 py-2 text-right font-medium" style={{ color: "#00369C" }}>{formato(r.valorTotal)}</td>
                   <td className="px-3 py-2 text-center">
-                    <button onClick={() => eliminarGen(g.id)} className="text-red-600 font-bold px-2">✕</button>
+                    <button onClick={() => eliminarGen(g.id)} className="text-red-600 font-bold px-2">X</button>
                   </td>
                 </tr>
               );
             })}
             {gen.length === 0 && (
-              <tr><td colSpan={8} className="px-3 py-6 text-center text-gray-500">Sin costos generales aún.</td></tr>
+              <tr><td colSpan={8} className="px-3 py-6 text-center text-gray-500">Sin costos generales aun.</td></tr>
             )}
           </tbody>
         </table>
