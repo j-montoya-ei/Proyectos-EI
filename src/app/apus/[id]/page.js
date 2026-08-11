@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
+import { Boton, Input, Card } from "../../../components/ui";
 
 const FAMILIAS = {
   materiales: {
@@ -130,19 +131,23 @@ export default function ArmarApuPage() {
   const secciones = apu ? SECCIONES[apu.tipo] || SECCIONES.obra : [];
   const total = lineas.reduce((s, l) => s + l.cantidad * l.valor_unitario, 0);
 
-  if (!apu) return <div className="p-8 text-gray-500">Cargando...</div>;
+  if (!apu) return <div className="max-w-5xl mx-auto"><div className="skeleton h-40 rounded-xl" /></div>;
 
   return (
-    <div className="p-8">
-      <a href="/apus" className="text-sm" style={{ color: "#00369C" }}>
-        ← Volver a APUs
+    <div className="max-w-5xl mx-auto pb-24">
+      <a href="/apus" className="inline-flex items-center gap-1.5 text-sm text-azul hover:underline mb-3">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Volver a APUs
       </a>
-      <h1 className="text-2xl font-bold mt-2 mb-1" style={{ color: "#00369C" }}>
-        {apu.codigo} · {apu.descripcion}
-      </h1>
-      <p className="text-gray-500 mb-6">
-        Unidad: {apu.unidad || "-"} · Tipo: {apu.tipo}
-      </p>
+
+      <div className="mb-6 animate-fade-in">
+        <h1 className="text-2xl font-bold text-azul">{apu.descripcion}</h1>
+        <p className="text-gray-500 text-sm mt-0.5">
+          Código {apu.codigo || "-"} · Unidad {apu.unidad || "-"} · <span className="capitalize">{apu.tipo}</span>
+        </p>
+      </div>
 
       {secciones.map((familia) => {
         const cfg = FAMILIAS[familia];
@@ -150,29 +155,29 @@ export default function ArmarApuPage() {
         const subtotal = lineasFam.reduce((s, l) => s + l.cantidad * l.valor_unitario, 0);
         const res = resultados[familia] || [];
         return (
-          <div key={familia} className="mb-8 border rounded-lg overflow-hidden">
-            <div className="px-4 py-2 font-semibold text-white" style={{ backgroundColor: "#00369C" }}>
+          <Card key={familia} className="mb-6 overflow-hidden animate-slide-up">
+            <div className="px-4 py-2.5 font-semibold text-white bg-azul text-sm">
               {cfg.label}
             </div>
 
             <div className="p-4">
-              <div className="relative mb-3">
-                <input
-                  className="border rounded px-3 py-2 w-full"
+              <div className="relative mb-4">
+                <Input
+                  className="w-full"
                   placeholder={`Buscar en ${cfg.label.toLowerCase()}...`}
                   value={busq[familia] || ""}
                   onChange={(e) => buscar(familia, e.target.value)}
                 />
                 {res.length > 0 && (
-                  <div className="absolute z-10 bg-white border rounded w-full mt-1 max-h-60 overflow-y-auto shadow">
+                  <div className="absolute z-10 bg-white border border-[#e5e7eb] rounded-lg w-full mt-1 max-h-60 overflow-y-auto shadow-lg">
                     {res.map((item) => (
                       <div
                         key={item.id}
                         onClick={() => agregar(familia, item)}
-                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex justify-between text-sm"
+                        className="px-3 py-2 hover:bg-azul-soft cursor-pointer flex justify-between gap-3 text-sm transition-colors"
                       >
                         <span>{item[cfg.desc]}</span>
-                        <span className="text-gray-500">{formato(cfg.precio(item))}</span>
+                        <span className="text-gray-500 whitespace-nowrap">{formato(cfg.precio(item))}</span>
                       </div>
                     ))}
                   </div>
@@ -181,43 +186,46 @@ export default function ArmarApuPage() {
 
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-gray-500 border-b">
-                    <th className="text-left py-1">Descripción</th>
-                    <th className="text-right py-1 w-28">Cantidad</th>
-                    <th className="text-right py-1 w-36">Vr. unitario</th>
-                    <th className="text-right py-1 w-36">Subtotal</th>
-                    <th className="w-16"></th>
+                  <tr className="text-gray-500 border-b border-[#e5e7eb] text-xs uppercase">
+                    <th className="text-left py-2 font-semibold">Descripción</th>
+                    <th className="text-right py-2 w-28 font-semibold">Cantidad</th>
+                    <th className="text-right py-2 w-36 font-semibold">Vr. unitario</th>
+                    <th className="text-right py-2 w-36 font-semibold">Subtotal</th>
+                    <th className="w-12"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {lineasFam.map((l) => (
-                    <tr key={l.id} className="border-b">
-                      <td className="py-1">{l.descripcion}</td>
-                      <td className="text-right py-1">
+                    <tr key={l.id} className="border-b border-[#f0f1f3]">
+                      <td className="py-2">{l.descripcion}</td>
+                      <td className="text-right py-2">
                         <input
                           type="number"
                           defaultValue={l.cantidad}
                           onBlur={(e) => cambiarCantidad(l.id, e.target.value)}
-                          className="border rounded px-2 py-1 w-24 text-right"
+                          className="w-24 text-right px-2 py-1.5 text-sm bg-white border border-[#d1d5db] rounded-lg outline-none focus:border-azul focus:ring-2 focus:ring-azul/25"
                         />
                       </td>
-                      <td className="text-right py-1">{formato(l.valor_unitario)}</td>
-                      <td className="text-right py-1 font-medium">
+                      <td className="text-right py-2 text-gray-600">{formato(l.valor_unitario)}</td>
+                      <td className="text-right py-2 font-semibold text-azul">
                         {formato(l.cantidad * l.valor_unitario)}
                       </td>
-                      <td className="text-center py-1">
+                      <td className="text-center py-2">
                         <button
                           onClick={() => eliminarLinea(l.id)}
-                          className="text-red-600 font-bold px-2"
+                          className="text-gray-400 hover:text-red-600 transition-colors p-1"
+                          title="Eliminar línea"
                         >
-                          ✕
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 6 6 18M6 6l12 12" />
+                          </svg>
                         </button>
                       </td>
                     </tr>
                   ))}
                   {lineasFam.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="py-3 text-center text-gray-400">
+                      <td colSpan={5} className="py-4 text-center text-gray-400">
                         Sin líneas en esta sección.
                       </td>
                     </tr>
@@ -225,23 +233,17 @@ export default function ArmarApuPage() {
                 </tbody>
               </table>
 
-              <div className="text-right mt-2 font-semibold">
-                Subtotal {cfg.label}: {formato(subtotal)}
+              <div className="text-right mt-3 text-sm font-semibold text-gray-700">
+                Subtotal {cfg.label}: <span className="text-azul">{formato(subtotal)}</span>
               </div>
             </div>
-          </div>
+          </Card>
         );
       })}
 
-      <div className="flex justify-between items-center border-t pt-4">
-        <button
-          onClick={actualizarPrecios}
-          className="px-4 py-2 rounded font-semibold"
-          style={{ backgroundColor: "#F6D000" }}
-        >
-          Actualizar precios
-        </button>
-        <div className="text-xl font-bold" style={{ color: "#00369C" }}>
+      <div className="fixed bottom-0 left-0 right-0 md:left-[248px] bg-white border-t border-[#e5e7eb] px-6 py-3 flex justify-between items-center z-10">
+        <Boton variant="warning" onClick={actualizarPrecios}>Actualizar precios</Boton>
+        <div className="text-lg md:text-xl font-bold text-azul">
           COSTO APU: {formato(total)}
         </div>
       </div>
