@@ -2,23 +2,26 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
+import { Boton, Input, Select, Card, Tabla, Celda, PageHeader } from "../../components/ui";
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([]);
   const [nombre, setNombre] = useState("");
   const [tipo, setTipo] = useState("Privado");
   const [editId, setEditId] = useState(null);
+  const [cargando, setCargando] = useState(true);
 
   async function cargar() {
     const { data } = await supabase.from("clientes").select("*").order("id");
     setClientes(data || []);
+    setCargando(false);
   }
 
   useEffect(() => {
     cargar();
   }, []);
 
-async function guardar() {
+  async function guardar() {
     if (!nombre.trim()) return;
     let error;
     if (editId) {
@@ -34,6 +37,7 @@ async function guardar() {
   }
 
   async function borrar(id) {
+    if (!window.confirm("¿Seguro que quieres borrar este cliente?")) return;
     await supabase.from("clientes").delete().eq("id", id);
     cargar();
   }
@@ -45,60 +49,59 @@ async function guardar() {
   }
 
   return (
-    <div>
-      <h1 style={{ color: "#00369C", marginBottom: 24 }}>Clientes</h1>
+    <div className="max-w-5xl mx-auto">
+      <PageHeader titulo="Clientes" subtitulo="Gestión de clientes de Proyectos EI" />
 
-      <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap" }}>
-        <input
-          placeholder="Nombre del cliente"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          style={inp}
-        />
-        <select value={tipo} onChange={(e) => setTipo(e.target.value)} style={inp}>
-          <option>Privado</option>
-          <option>Público</option>
-        </select>
-        <button onClick={guardar} style={btnAzul}>
-          {editId ? "Actualizar" : "Agregar"}
-        </button>
-        {editId && (
-          <button onClick={() => { setEditId(null); setNombre(""); }} style={btnGris}>
-            Cancelar
-          </button>
-        )}
-      </div>
+      <Card className="p-4 mb-6 animate-slide-up">
+        <div className="flex gap-2.5 flex-wrap items-center">
+          <Input
+            placeholder="Nombre del cliente"
+            value={nombre}
+            onChange={(e) => setNombre(e.target.value)}
+            className="flex-1 min-w-[220px]"
+          />
+          <Select value={tipo} onChange={(e) => setTipo(e.target.value)}>
+            <option>Privado</option>
+            <option>Público</option>
+          </Select>
+          <Boton onClick={guardar}>{editId ? "Actualizar" : "Agregar"}</Boton>
+          {editId && (
+            <Boton variant="secondary" onClick={() => { setEditId(null); setNombre(""); setTipo("Privado"); }}>
+              Cancelar
+            </Boton>
+          )}
+        </div>
+      </Card>
 
-      <table style={{ width: "100%", borderCollapse: "collapse", background: "white", borderRadius: 8, overflow: "hidden" }}>
-        <thead>
-          <tr style={{ background: "#00369C", color: "white", textAlign: "left" }}>
-            <th style={td}>ID</th>
-            <th style={td}>Nombre</th>
-            <th style={td}>Tipo</th>
-            <th style={td}>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
+      {cargando ? (
+        <div className="skeleton h-40 rounded-xl" />
+      ) : clientes.length === 0 ? (
+        <Card className="p-10 text-center text-gray-400 text-sm animate-slide-up">
+          Aún no hay clientes registrados.
+        </Card>
+      ) : (
+        <Tabla columnas={["ID", "Nombre", "Tipo", "Acciones"]}>
           {clientes.map((c) => (
-            <tr key={c.id} style={{ borderBottom: "1px solid #eee" }}>
-              <td style={td}>{c.id}</td>
-              <td style={td}>{c.nombre}</td>
-              <td style={td}>{c.tipo}</td>
-              <td style={td}>
-                <button onClick={() => editar(c)} style={btnMini}>Editar</button>
-                <button onClick={() => borrar(c.id)} style={btnMiniRojo}>Borrar</button>
-              </td>
+            <tr key={c.id} className="border-b border-[#f0f1f3] last:border-0 hover:bg-[#f9fafb] transition-colors">
+              <Celda className="text-gray-500">{c.id}</Celda>
+              <Celda className="font-medium">{c.nombre}</Celda>
+              <Celda>
+                <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  c.tipo === "Público" ? "bg-[#fef7d6] text-[#8a7400]" : "bg-azul-soft text-azul"
+                }`}>
+                  {c.tipo}
+                </span>
+              </Celda>
+              <Celda>
+                <div className="flex gap-2">
+                  <Boton size="sm" variant="warning" onClick={() => editar(c)}>Editar</Boton>
+                  <Boton size="sm" variant="danger" onClick={() => borrar(c.id)}>Borrar</Boton>
+                </div>
+              </Celda>
             </tr>
           ))}
-        </tbody>
-      </table>
+        </Tabla>
+      )}
     </div>
   );
 }
-
-const inp = { padding: "10px 12px", border: "1px solid #ccc", borderRadius: 8, fontSize: 14 };
-const btnAzul = { padding: "10px 20px", background: "#00369C", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 600 };
-const btnGris = { padding: "10px 20px", background: "#A4A8AB", color: "white", border: "none", borderRadius: 8, cursor: "pointer" };
-const td = { padding: "12px 14px" };
-const btnMini = { padding: "6px 12px", background: "#F6D000", color: "#00369C", border: "none", borderRadius: 6, cursor: "pointer", marginRight: 6, fontWeight: 600 };
-const btnMiniRojo = { padding: "6px 12px", background: "#e53e3e", color: "white", border: "none", borderRadius: 6, cursor: "pointer" };
