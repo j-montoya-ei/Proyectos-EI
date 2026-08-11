@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 import ImportarDatos from "../../components/ImportarDatos";
+import { Boton, Input, Card, Tabla, Celda, PageHeader } from "../../components/ui";
 
 export default function Materiales() {
   const [items, setItems] = useState([]);
@@ -30,51 +31,56 @@ export default function Materiales() {
   const money = (n) => "$" + Number(n || 0).toLocaleString("es-CO");
 
   return (
-    <div>
-      <h1 style={{ color: "#00369C", marginBottom: 20 }}>Materiales (SIESA)</h1>
+    <div className="max-w-6xl mx-auto">
+      <PageHeader titulo="Materiales (SIESA)" subtitulo="Catálogo de materiales con búsqueda en tiempo real" />
 
-      <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-        <input
-          placeholder="Buscar por descripción o código..."
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && buscar()}
-          style={{ flex: 1, padding: "10px 14px", border: "1px solid #ccc", borderRadius: 8, fontSize: 14 }}
+      <Card className="p-4 mb-5 animate-slide-up">
+        <ImportarDatos
+          tabla="materiales"
+          onImport={buscar}
+          columnas={[
+            { campo: "codigo", tipo: "texto" },
+            { campo: "descripcion", tipo: "texto" },
+            { campo: "ume", tipo: "texto" },
+            { campo: "bodega", tipo: "texto" },
+            { campo: "costo_base", tipo: "numero" },
+          ]}
         />
-        <button onClick={buscar} style={{ padding: "10px 24px", background: "#00369C", color: "white", border: "none", borderRadius: 8, cursor: "pointer", fontWeight: 600 }}>
-          Buscar
-        </button>
-      </div>
+        <div className="flex gap-2.5 flex-wrap pt-1">
+          <Input
+            placeholder="Buscar por descripción o código..."
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && buscar()}
+            className="flex-1 min-w-[240px]"
+          />
+          <Boton onClick={buscar}>Buscar</Boton>
+        </div>
+      </Card>
 
-      <p style={{ color: "#666", fontSize: 13, marginBottom: 10 }}>
+      <p className="text-gray-500 text-xs mb-3">
         {cargando ? "Cargando..." : `Mostrando ${items.length} resultados (máx. 100)`}
       </p>
 
-      <table style={{ width: "100%", borderCollapse: "collapse", background: "white", borderRadius: 8, overflow: "hidden", fontSize: 14 }}>
-        <thead>
-          <tr style={{ background: "#00369C", color: "white", textAlign: "left" }}>
-            <th style={th}>Código</th>
-            <th style={th}>Descripción</th>
-            <th style={th}>UM</th>
-            <th style={th}>Bodega</th>
-            <th style={{ ...th, textAlign: "right" }}>Costo base</th>
-          </tr>
-        </thead>
-        <tbody>
+      {cargando ? (
+        <div className="skeleton h-64 rounded-xl" />
+      ) : items.length === 0 ? (
+        <Card className="p-10 text-center text-gray-400 text-sm animate-slide-up">
+          Sin resultados para esta búsqueda.
+        </Card>
+      ) : (
+        <Tabla columnas={["Código", "Descripción", "UM", "Bodega", <span key="cb" className="block text-right">Costo base</span>]}>
           {items.map((m) => (
-            <tr key={m.id} style={{ borderBottom: "1px solid #eee" }}>
-              <td style={td}>{m.codigo}</td>
-              <td style={td}>{m.descripcion}</td>
-              <td style={td}>{m.ume}</td>
-              <td style={td}>{m.bodega}</td>
-              <td style={{ ...td, textAlign: "right", fontWeight: 600 }}>{money(m.costo_base)}</td>
+            <tr key={m.id} className="border-b border-[#f0f1f3] last:border-0 hover:bg-[#f9fafb] transition-colors">
+              <Celda className="text-gray-500 whitespace-nowrap">{m.codigo}</Celda>
+              <Celda className="font-medium">{m.descripcion}</Celda>
+              <Celda className="text-gray-600">{m.ume}</Celda>
+              <Celda className="text-gray-600">{m.bodega}</Celda>
+              <Celda className="text-right font-semibold text-azul whitespace-nowrap">{money(m.costo_base)}</Celda>
             </tr>
           ))}
-        </tbody>
-      </table>
+        </Tabla>
+      )}
     </div>
   );
 }
-
-const th = { padding: "12px 14px" };
-const td = { padding: "10px 14px" };
