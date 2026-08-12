@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "../../../lib/supabase";
+import { Boton, Input, Card } from "../../../components/ui";
 
 const formato = (n) =>
   Number(n).toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
@@ -238,7 +239,7 @@ export default function ArmarPresupuestoPage() {
     cargarGenerales();
   }
 
-  if (!pres) return <div className="p-8 text-gray-500">Cargando...</div>;
+  if (!pres) return <div className="max-w-6xl mx-auto"><div className="skeleton h-40 rounded-xl" /></div>;
 
   const ot = Number(cfg.ot) / 100 || 0;
   const iva = Number(cfg.iva) / 100 || 0;
@@ -257,215 +258,201 @@ export default function ArmarPresupuestoPage() {
     lineas.reduce((s, l) => s + calc(l.costo_unitario, l.cantidad).valorTotal, 0) +
     gen.reduce((s, g) => s + calc(g.valor_unitario, g.cantidad).valorTotal, 0);
 
+  const IconX = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  );
+
   return (
-    <div className="p-8">
-      <a href="/presupuesto" className="text-sm" style={{ color: "#00369C" }}>
+    <div className="max-w-6xl mx-auto pb-24">
+      <a href="/presupuesto" className="inline-flex items-center gap-1.5 text-sm text-azul hover:underline mb-3">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
         Volver a Presupuestos
       </a>
-      <h1 className="text-2xl font-bold mt-2 mb-1" style={{ color: "#00369C" }}>
-        {pres.nombre}
-      </h1>
-      <p className="text-gray-500 mb-6">Cliente: {pres.clientes?.nombre || "-"}</p>
 
-      <div className="flex flex-wrap gap-3 mb-6">
-        <a
-          href={`/presupuesto/${presId}/oferta`}
-          className="inline-block px-4 py-2 rounded font-semibold text-white"
-          style={{ backgroundColor: "#00369C" }}
-        >
-          Generar oferta tecnico-comercial
+      <div className="mb-5 animate-fade-in">
+        <h1 className="text-2xl font-bold text-azul">{pres.nombre}</h1>
+        <p className="text-gray-500 text-sm mt-0.5">Cliente: {pres.clientes?.nombre || "-"}</p>
+      </div>
+
+      <div className="flex flex-wrap gap-2.5 mb-6">
+        <a href={`/presupuesto/${presId}/oferta`}
+          className="inline-flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold bg-azul text-white hover:bg-azul-hover transition-colors">
+          Generar oferta técnico-comercial
         </a>
-        <button
-          onClick={guardarVersion}
-          className="px-4 py-2 rounded font-semibold"
-          style={{ backgroundColor: "#F6D000" }}
-        >
-          Guardar version
-        </button>
-        <a
-          href={`/presupuesto/${presId}/versiones`}
-          className="inline-block px-4 py-2 rounded font-semibold text-white"
-          style={{ backgroundColor: "#A4A8AB" }}
-        >
+        <Boton variant="warning" onClick={guardarVersion}>Guardar versión</Boton>
+        <a href={`/presupuesto/${presId}/versiones`}
+          className="inline-flex items-center px-4 py-2.5 rounded-lg text-sm font-semibold bg-white border border-[#d1d5db] text-gray-700 hover:bg-gray-50 transition-colors">
           Ver versiones
         </a>
       </div>
 
-      {/* Porcentajes globales */}
-      <div className="bg-white border rounded-lg p-4 mb-6 flex flex-wrap gap-4 items-end">
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">OT %</label>
-          <input type="number" className="border rounded px-3 py-2 w-24" value={cfg.ot}
-            onChange={(e) => setCfg({ ...cfg, ot: e.target.value })} />
-        </div>
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">IVA %</label>
-          <input type="number" className="border rounded px-3 py-2 w-24" value={cfg.iva}
-            onChange={(e) => setCfg({ ...cfg, iva: e.target.value })} />
-        </div>
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">UE %</label>
-          <input type="number" className="border rounded px-3 py-2 w-24" value={cfg.ue}
-            onChange={(e) => setCfg({ ...cfg, ue: e.target.value })} />
-        </div>
-        <button onClick={guardarPorcentajes} className="px-5 py-2 rounded font-semibold text-white"
-          style={{ backgroundColor: "#00369C" }}>
-          Guardar %
-        </button>
-      </div>
-
-      {/* Buscador de APUs */}
-      <div className="relative mb-4">
-        <input className="border rounded px-3 py-2 w-full" placeholder="Buscar APU por codigo o descripcion..."
-          value={busq} onChange={(e) => buscar(e.target.value)} />
-        {resultados.length > 0 && (
-          <div className="absolute z-10 bg-white border rounded w-full mt-1 max-h-60 overflow-y-auto shadow">
-            {resultados.map((a) => (
-              <div key={a.id} onClick={() => agregar(a)}
-                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm">
-                {a.codigo} - {a.descripcion}
-              </div>
-            ))}
+      <Card className="p-4 mb-6 animate-slide-up">
+        <div className="flex flex-wrap gap-4 items-end">
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">OT %</label>
+            <Input type="number" className="w-24" value={cfg.ot} onChange={(e) => setCfg({ ...cfg, ot: e.target.value })} />
           </div>
-        )}
-      </div>
-
-      {/* Tabla APUs */}
-      <div className="overflow-x-auto border rounded-lg mb-8">
-        <table className="w-full text-sm">
-          <thead style={{ backgroundColor: "#00369C" }} className="text-white">
-            <tr>
-              <th className="px-3 py-2 text-left">APU</th>
-              <th className="px-3 py-2 text-right w-24">Cantidad</th>
-              <th className="px-3 py-2 text-right">Costo unit.</th>
-              <th className="px-3 py-2 text-right">Costo total</th>
-              <th className="px-3 py-2 text-right">Valor unit.</th>
-              <th className="px-3 py-2 text-right">Valor total</th>
-              <th className="w-12"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {lineas.map((l) => {
-              const r = calc(l.costo_unitario, l.cantidad);
-              return (
-                <tr key={l.id} className="border-t hover:bg-gray-50">
-                  <td className="px-3 py-2 font-medium">{l.apus?.codigo} - {l.apus?.descripcion}</td>
-                  <td className="px-3 py-2 text-right">
-                    <input type="number" defaultValue={l.cantidad}
-                      onBlur={(e) => cambiarCantidad(l.id, e.target.value)}
-                      className="border rounded px-2 py-1 w-20 text-right" />
-                  </td>
-                  <td className="px-3 py-2 text-right">{formato(r.costoUnit)}</td>
-                  <td className="px-3 py-2 text-right font-medium">{formato(r.costoTotal)}</td>
-                  <td className="px-3 py-2 text-right">{formato(r.valorUnit)}</td>
-                  <td className="px-3 py-2 text-right font-medium" style={{ color: "#00369C" }}>{formato(r.valorTotal)}</td>
-                  <td className="px-3 py-2 text-center">
-                    <button onClick={() => eliminarLinea(l.id)} className="text-red-600 font-bold px-2">X</button>
-                  </td>
-                </tr>
-              );
-            })}
-            {lineas.length === 0 && (
-              <tr><td colSpan={7} className="px-3 py-6 text-center text-gray-500">Sin APUs aun. Buscalas arriba.</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Costos generales */}
-      <h2 className="text-lg font-bold mb-3" style={{ color: "#00369C" }}>
-        Costos generales (viaticos y transporte)
-      </h2>
-
-      <div className="relative mb-3">
-        <input className="border rounded px-3 py-2 w-full" placeholder="Buscar en viaticos y transporte..."
-          value={busqG} onChange={(e) => buscarGen(e.target.value)} />
-        {resG.length > 0 && (
-          <div className="absolute z-10 bg-white border rounded w-full mt-1 max-h-60 overflow-y-auto shadow">
-            {resG.map((item) => (
-              <div key={item.origen + item.id} onClick={() => agregarGen(item)}
-                className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex justify-between text-sm">
-                <span><span className="text-gray-400 mr-2">[{item.origen}]</span>{item.descripcion}</span>
-                <span className="text-gray-500">{formato(item.costo)}</span>
-              </div>
-            ))}
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">IVA %</label>
+            <Input type="number" className="w-24" value={cfg.iva} onChange={(e) => setCfg({ ...cfg, iva: e.target.value })} />
           </div>
-        )}
-      </div>
-
-      {/* Entrada manual */}
-      <div className="bg-white border rounded-lg p-3 mb-4 flex flex-wrap gap-3 items-end">
-        <div className="flex-1 min-w-[200px]">
-          <label className="block text-sm text-gray-600 mb-1">Descripcion (manual)</label>
-          <input className="border rounded px-3 py-2 w-full" value={manual.descripcion}
-            onChange={(e) => setManual({ ...manual, descripcion: e.target.value })}
-            placeholder="Ej: Combustible obra" />
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">UE %</label>
+            <Input type="number" className="w-24" value={cfg.ue} onChange={(e) => setCfg({ ...cfg, ue: e.target.value })} />
+          </div>
+          <Boton onClick={guardarPorcentajes}>Guardar %</Boton>
         </div>
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">Valor unitario</label>
-          <input type="number" className="border rounded px-3 py-2 w-40" value={manual.valor}
-            onChange={(e) => setManual({ ...manual, valor: e.target.value })} placeholder="0" />
-        </div>
-        <button onClick={agregarManual} className="px-4 py-2 rounded font-semibold text-white"
-          style={{ backgroundColor: "#00369C" }}>
-          Agregar manual
-        </button>
-      </div>
+      </Card>
 
-      <div className="overflow-x-auto border rounded-lg">
-        <table className="w-full text-sm">
-          <thead style={{ backgroundColor: "#00369C" }} className="text-white">
-            <tr>
-              <th className="px-3 py-2 text-left">Concepto</th>
-              <th className="px-3 py-2 text-left w-28">Origen</th>
-              <th className="px-3 py-2 text-right w-24">Cantidad</th>
-              <th className="px-3 py-2 text-right">Costo unit.</th>
-              <th className="px-3 py-2 text-right">Costo total</th>
-              <th className="px-3 py-2 text-right">Valor unit.</th>
-              <th className="px-3 py-2 text-right">Valor total</th>
-              <th className="w-12"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {gen.map((g) => {
-              const r = calc(g.valor_unitario, g.cantidad);
-              return (
-                <tr key={g.id} className="border-t hover:bg-gray-50">
-                  <td className="px-3 py-2 font-medium">{g.descripcion}</td>
-                  <td className="px-3 py-2 capitalize text-gray-500">{g.origen}</td>
-                  <td className="px-3 py-2 text-right">
-                    <input type="number" defaultValue={g.cantidad}
-                      onBlur={(e) => cambiarCantidadGen(g.id, e.target.value)}
-                      className="border rounded px-2 py-1 w-20 text-right" />
-                  </td>
-                  <td className="px-3 py-2 text-right">{formato(r.costoUnit)}</td>
-                  <td className="px-3 py-2 text-right font-medium">{formato(r.costoTotal)}</td>
-                  <td className="px-3 py-2 text-right">{formato(r.valorUnit)}</td>
-                  <td className="px-3 py-2 text-right font-medium" style={{ color: "#00369C" }}>{formato(r.valorTotal)}</td>
-                  <td className="px-3 py-2 text-center">
-                    <button onClick={() => eliminarGen(g.id)} className="text-red-600 font-bold px-2">X</button>
-                  </td>
-                </tr>
-              );
-            })}
-            {gen.length === 0 && (
-              <tr><td colSpan={8} className="px-3 py-6 text-center text-gray-500">Sin costos generales aun.</td></tr>
+      <Card className="overflow-hidden mb-8 animate-slide-up">
+        <div className="px-4 py-2.5 font-semibold text-white bg-azul text-sm">APUs</div>
+        <div className="p-4">
+          <div className="relative mb-4">
+            <Input className="w-full" placeholder="Buscar APU por código o descripción..."
+              value={busq} onChange={(e) => buscar(e.target.value)} />
+            {resultados.length > 0 && (
+              <div className="absolute z-10 bg-white border border-[#e5e7eb] rounded-lg w-full mt-1 max-h-60 overflow-y-auto shadow-lg">
+                {resultados.map((a) => (
+                  <div key={a.id} onClick={() => agregar(a)}
+                    className="px-3 py-2 hover:bg-azul-soft cursor-pointer text-sm transition-colors">
+                    {a.codigo} - {a.descripcion}
+                  </div>
+                ))}
+              </div>
             )}
-          </tbody>
-        </table>
-      </div>
+          </div>
 
-      {/* Totales */}
-      <div className="flex justify-between items-center border-t mt-4 pt-4">
-        <button onClick={actualizarCostos} className="px-4 py-2 rounded font-semibold"
-          style={{ backgroundColor: "#F6D000" }}>
-          Actualizar costos
-        </button>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-gray-500 border-b border-[#e5e7eb] text-xs uppercase text-right">
+                  <th className="px-2 py-2 text-left font-semibold">APU</th>
+                  <th className="px-2 py-2 w-24 font-semibold">Cantidad</th>
+                  <th className="px-2 py-2 font-semibold">Costo unit.</th>
+                  <th className="px-2 py-2 font-semibold">Costo total</th>
+                  <th className="px-2 py-2 font-semibold">Valor unit.</th>
+                  <th className="px-2 py-2 font-semibold">Valor total</th>
+                  <th className="w-10"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {lineas.map((l) => {
+                  const r = calc(l.costo_unitario, l.cantidad);
+                  return (
+                    <tr key={l.id} className="border-b border-[#f0f1f3]">
+                      <td className="px-2 py-2 font-medium">{l.apus?.codigo} - {l.apus?.descripcion}</td>
+                      <td className="px-2 py-2 text-right">
+                        <input type="number" defaultValue={l.cantidad}
+                          onBlur={(e) => cambiarCantidad(l.id, e.target.value)}
+                          className="w-20 text-right px-2 py-1.5 text-sm bg-white border border-[#d1d5db] rounded-lg outline-none focus:border-azul focus:ring-2 focus:ring-azul/25" />
+                      </td>
+                      <td className="px-2 py-2 text-right text-gray-600 whitespace-nowrap">{formato(r.costoUnit)}</td>
+                      <td className="px-2 py-2 text-right font-medium whitespace-nowrap">{formato(r.costoTotal)}</td>
+                      <td className="px-2 py-2 text-right text-gray-600 whitespace-nowrap">{formato(r.valorUnit)}</td>
+                      <td className="px-2 py-2 text-right font-semibold text-azul whitespace-nowrap">{formato(r.valorTotal)}</td>
+                      <td className="px-2 py-2 text-center">
+                        <button onClick={() => eliminarLinea(l.id)} className="text-gray-400 hover:text-red-600 transition-colors p-1"><IconX /></button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {lineas.length === 0 && (
+                  <tr><td colSpan={7} className="px-3 py-6 text-center text-gray-400">Sin APUs aún. Búscalas arriba.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="overflow-hidden mb-6 animate-slide-up">
+        <div className="px-4 py-2.5 font-semibold text-white bg-azul text-sm">Costos generales (viáticos y transporte)</div>
+        <div className="p-4">
+          <div className="relative mb-4">
+            <Input className="w-full" placeholder="Buscar en viáticos y transporte..."
+              value={busqG} onChange={(e) => buscarGen(e.target.value)} />
+            {resG.length > 0 && (
+              <div className="absolute z-10 bg-white border border-[#e5e7eb] rounded-lg w-full mt-1 max-h-60 overflow-y-auto shadow-lg">
+                {resG.map((item) => (
+                  <div key={item.origen + item.id} onClick={() => agregarGen(item)}
+                    className="px-3 py-2 hover:bg-azul-soft cursor-pointer flex justify-between gap-3 text-sm transition-colors">
+                    <span><span className="text-gray-400 mr-2">[{item.origen}]</span>{item.descripcion}</span>
+                    <span className="text-gray-500 whitespace-nowrap">{formato(item.costo)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-wrap gap-3 items-end mb-4 pb-4 border-b border-[#f0f1f3]">
+            <div className="flex-1 min-w-[200px]">
+              <label className="block text-xs font-medium text-gray-500 mb-1">Descripción (manual)</label>
+              <Input className="w-full" value={manual.descripcion}
+                onChange={(e) => setManual({ ...manual, descripcion: e.target.value })}
+                placeholder="Ej: Combustible obra" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Valor unitario</label>
+              <Input type="number" className="w-40" value={manual.valor}
+                onChange={(e) => setManual({ ...manual, valor: e.target.value })} placeholder="0" />
+            </div>
+            <Boton onClick={agregarManual}>Agregar manual</Boton>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-gray-500 border-b border-[#e5e7eb] text-xs uppercase text-right">
+                  <th className="px-2 py-2 text-left font-semibold">Concepto</th>
+                  <th className="px-2 py-2 text-left w-28 font-semibold">Origen</th>
+                  <th className="px-2 py-2 w-24 font-semibold">Cantidad</th>
+                  <th className="px-2 py-2 font-semibold">Costo unit.</th>
+                  <th className="px-2 py-2 font-semibold">Costo total</th>
+                  <th className="px-2 py-2 font-semibold">Valor unit.</th>
+                  <th className="px-2 py-2 font-semibold">Valor total</th>
+                  <th className="w-10"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {gen.map((g) => {
+                  const r = calc(g.valor_unitario, g.cantidad);
+                  return (
+                    <tr key={g.id} className="border-b border-[#f0f1f3]">
+                      <td className="px-2 py-2 font-medium">{g.descripcion}</td>
+                      <td className="px-2 py-2 capitalize text-gray-500">{g.origen}</td>
+                      <td className="px-2 py-2 text-right">
+                        <input type="number" defaultValue={g.cantidad}
+                          onBlur={(e) => cambiarCantidadGen(g.id, e.target.value)}
+                          className="w-20 text-right px-2 py-1.5 text-sm bg-white border border-[#d1d5db] rounded-lg outline-none focus:border-azul focus:ring-2 focus:ring-azul/25" />
+                      </td>
+                      <td className="px-2 py-2 text-right text-gray-600 whitespace-nowrap">{formato(r.costoUnit)}</td>
+                      <td className="px-2 py-2 text-right font-medium whitespace-nowrap">{formato(r.costoTotal)}</td>
+                      <td className="px-2 py-2 text-right text-gray-600 whitespace-nowrap">{formato(r.valorUnit)}</td>
+                      <td className="px-2 py-2 text-right font-semibold text-azul whitespace-nowrap">{formato(r.valorTotal)}</td>
+                      <td className="px-2 py-2 text-center">
+                        <button onClick={() => eliminarGen(g.id)} className="text-gray-400 hover:text-red-600 transition-colors p-1"><IconX /></button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {gen.length === 0 && (
+                  <tr><td colSpan={8} className="px-3 py-6 text-center text-gray-400">Sin costos generales aún.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </Card>
+
+      <div className="fixed bottom-0 left-0 right-0 md:left-[248px] bg-white border-t border-[#e5e7eb] px-6 py-3 flex justify-between items-center gap-4 z-10">
+        <Boton variant="warning" onClick={actualizarCostos}>Actualizar costos</Boton>
         <div className="text-right">
-          <div className="text-gray-600">Costo total: {formato(totalCosto)}</div>
-          <div className="text-xl font-bold" style={{ color: "#00369C" }}>
-            Valor total: {formato(totalValor)}
-          </div>
+          <div className="text-gray-500 text-xs">Costo total: {formato(totalCosto)}</div>
+          <div className="text-lg md:text-xl font-bold text-azul">Valor total: {formato(totalValor)}</div>
         </div>
       </div>
     </div>
