@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
+import { Boton, Input, Select, Card, Tabla, Celda, PageHeader } from "../../components/ui";
 
 export default function PresupuestosPage() {
   const [presupuestos, setPresupuestos] = useState([]);
@@ -47,89 +48,52 @@ export default function PresupuestosPage() {
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6" style={{ color: "#00369C" }}>
-        Presupuestos
-      </h1>
+    <div className="max-w-5xl mx-auto">
+      <PageHeader titulo="Presupuestos" subtitulo="Gestión de presupuestos por cliente" />
 
-      <div className="bg-white border rounded-lg p-4 mb-6 flex flex-wrap gap-3 items-end">
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">Cliente *</label>
-          <select
-            className="border rounded px-3 py-2"
-            value={form.cliente_id}
-            onChange={(e) => setForm({ ...form, cliente_id: e.target.value })}
-          >
-            <option value="">Selecciona...</option>
-            {clientes.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nombre}
-              </option>
-            ))}
-          </select>
+      <Card className="p-4 mb-5 animate-slide-up">
+        <div className="flex flex-wrap gap-3 items-end">
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Cliente *</label>
+            <Select value={form.cliente_id} onChange={(e) => setForm({ ...form, cliente_id: e.target.value })} className="min-w-[200px]">
+              <option value="">Selecciona...</option>
+              {clientes.map((c) => (
+                <option key={c.id} value={c.id}>{c.nombre}</option>
+              ))}
+            </Select>
+          </div>
+          <div className="flex-1 min-w-[220px]">
+            <label className="block text-xs font-medium text-gray-500 mb-1">Nombre del presupuesto *</label>
+            <Input className="w-full" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Ej: Presupuesto obra Torre 1" />
+          </div>
+          <Boton onClick={crear}>Crear</Boton>
         </div>
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">Nombre del presupuesto *</label>
-          <input
-            className="border rounded px-3 py-2"
-            value={form.nombre}
-            onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-            placeholder="Ej: Presupuesto obra Torre 1"
-          />
-        </div>
-        <button
-          onClick={crear}
-          className="px-5 py-2 rounded font-semibold text-white"
-          style={{ backgroundColor: "#00369C" }}
-        >
-          Crear
-        </button>
-      </div>
+      </Card>
 
       {cargando ? (
-        <p className="text-gray-500">Cargando...</p>
+        <div className="skeleton h-56 rounded-xl" />
+      ) : presupuestos.length === 0 ? (
+        <Card className="p-10 text-center text-gray-400 text-sm animate-slide-up">Sin presupuestos aún.</Card>
       ) : (
-        <div className="overflow-x-auto border rounded-lg">
-          <table className="w-full text-sm">
-            <thead style={{ backgroundColor: "#00369C" }} className="text-white">
-              <tr>
-                <th className="px-4 py-2 text-left">Nombre</th>
-                <th className="px-4 py-2 text-left">Cliente</th>
-                <th className="px-4 py-2 text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {presupuestos.map((p) => (
-                <tr key={p.id} className="border-t hover:bg-gray-50">
-                  <td className="px-4 py-2 font-medium">{p.nombre}</td>
-                  <td className="px-4 py-2">{p.clientes?.nombre || "\u2014"}</td>
-                  <td className="px-4 py-2 text-center whitespace-nowrap">
-                    <a
-                      href={`/presupuesto/${p.id}`}
-                      className="px-3 py-1 rounded mr-2 font-semibold inline-block text-white"
-                      style={{ backgroundColor: "#00369C" }}
-                    >
-                      Armar
-                    </a>
-                    <button
-                      onClick={() => eliminar(p.id)}
-                      className="px-3 py-1 rounded font-semibold text-white bg-red-600"
-                    >
-                      Eliminar
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {presupuestos.length === 0 && (
-                <tr>
-                  <td colSpan={3} className="px-4 py-6 text-center text-gray-500">
-                    Sin presupuestos a\u00fan.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <Tabla columnas={["Nombre", "Cliente", <span key="a" className="block text-center">Acciones</span>]}>
+          {presupuestos.map((p) => (
+            <tr key={p.id} className="border-b border-[#f0f1f3] last:border-0 hover:bg-[#f9fafb] transition-colors">
+              <Celda className="font-medium">{p.nombre}</Celda>
+              <Celda className="text-gray-600">{p.clientes?.nombre || "\u2014"}</Celda>
+              <Celda>
+                <div className="flex gap-2 justify-center">
+                  <a
+                    href={`/presupuesto/${p.id}`}
+                    className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-azul text-white hover:bg-azul-hover transition-colors"
+                  >
+                    Armar
+                  </a>
+                  <Boton size="sm" variant="danger" onClick={() => eliminar(p.id)}>Eliminar</Boton>
+                </div>
+              </Celda>
+            </tr>
+          ))}
+        </Tabla>
       )}
     </div>
   );
