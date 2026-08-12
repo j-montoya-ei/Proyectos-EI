@@ -70,7 +70,7 @@ export default function DisenoPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <PageHeader titulo="Diseño y trámites" subtitulo="Catálogo de diseño y trámites" />
+      <PageHeader titulo="Mano de obra" subtitulo="Catálogo de Mano de obra" />
 
       <Card className="p-4 mb-5 animate-slide-up">
         <ImportarDatos
