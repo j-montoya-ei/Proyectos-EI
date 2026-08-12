@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "../../../../lib/supabase";
+import { Boton, Card } from "../../../../components/ui";
 
 const formato = (n) =>
   Number(n).toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
@@ -35,90 +36,80 @@ export default function VersionesPage() {
   }
 
   return (
-    <div className="p-8">
-      <a href={`/presupuesto/${presId}`} className="text-sm" style={{ color: "#00369C" }}>
-        ← Volver al presupuesto
+    <div className="max-w-5xl mx-auto">
+      <a href={`/presupuesto/${presId}`} className="inline-flex items-center gap-1.5 text-sm text-azul hover:underline mb-3">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Volver al presupuesto
       </a>
-      <h1 className="text-2xl font-bold mt-2 mb-6" style={{ color: "#00369C" }}>
-        Versiones guardadas
-      </h1>
+      <h1 className="text-2xl font-bold text-azul mb-6 animate-fade-in">Versiones guardadas</h1>
 
       {versiones.length === 0 && (
-        <p className="text-gray-500">Aún no has guardado ninguna versión.</p>
+        <Card className="p-10 text-center text-gray-400 text-sm animate-slide-up">
+          Aún no has guardado ninguna versión.
+        </Card>
       )}
 
       {versiones.map((v) => (
-        <div key={v.id} className="border rounded-lg mb-4 overflow-hidden">
-          <div className="flex justify-between items-center px-4 py-3" style={{ backgroundColor: "#00369C" }}>
+        <Card key={v.id} className="mb-4 overflow-hidden animate-slide-up">
+          <div className="flex justify-between items-center px-4 py-3 bg-azul gap-3 flex-wrap">
             <div className="text-white font-semibold">V{v.version} · {v.nombre}</div>
-            <div className="flex items-center gap-3">
-              <span className="text-white text-sm opacity-80">{fecha(v.creado_en)}</span>
-              <button
-                onClick={() => setAbierta(abierta === v.id ? null : v.id)}
-                className="px-3 py-1 rounded font-semibold text-sm"
-                style={{ backgroundColor: "#F6D000" }}
-              >
+            <div className="flex items-center gap-2.5">
+              <span className="text-white text-xs opacity-80">{fecha(v.creado_en)}</span>
+              <Boton size="sm" variant="warning" onClick={() => setAbierta(abierta === v.id ? null : v.id)}>
                 {abierta === v.id ? "Ocultar" : "Ver"}
-              </button>
-              <button
-                onClick={() => eliminar(v.id)}
-                className="px-3 py-1 rounded font-semibold text-white text-sm bg-red-600"
-              >
-                Eliminar
-              </button>
+              </Boton>
+              <Boton size="sm" variant="danger" onClick={() => eliminar(v.id)}>Eliminar</Boton>
             </div>
           </div>
 
-          <div className="flex justify-between px-4 py-2 text-sm bg-gray-50 border-b">
+          <div className="flex justify-between px-4 py-2.5 text-sm bg-[#f9fafb] border-b border-[#e5e7eb]">
             <span className="text-gray-600">Costo total: {formato(v.total_costo)}</span>
-            <span className="font-bold" style={{ color: "#00369C" }}>
-              Valor total: {formato(v.total_valor)}
-            </span>
+            <span className="font-bold text-azul">Valor total: {formato(v.total_valor)}</span>
           </div>
 
           {abierta === v.id && (
             <div className="p-4">
-              <p className="text-sm text-gray-500 mb-3">
+              <p className="text-sm text-gray-500 mb-4">
                 OT {((v.datos?.ot || 0) * 100).toFixed(1)}% · IVA {((v.datos?.iva || 0) * 100).toFixed(1)}% · UE {((v.datos?.ue || 0) * 100).toFixed(1)}%
               </p>
-              <Tabla titulo="APUs" filas={v.datos?.apus || []} />
-              <Tabla titulo="Costos generales" filas={v.datos?.generales || []} />
+              <TablaDetalle titulo="APUs" filas={v.datos?.apus || []} />
+              <TablaDetalle titulo="Costos generales" filas={v.datos?.generales || []} />
             </div>
           )}
-        </div>
+        </Card>
       ))}
     </div>
   );
 }
 
-function Tabla({ titulo, filas }) {
-  const formato = (n) =>
-    Number(n).toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
+function TablaDetalle({ titulo, filas }) {
   if (filas.length === 0) return null;
   return (
-    <div className="mb-6">
-      <h3 className="font-semibold mb-2" style={{ color: "#00369C" }}>{titulo}</h3>
-      <div className="overflow-x-auto border rounded-lg">
-        <table className="w-full text-sm">
-          <thead style={{ backgroundColor: "#00369C" }} className="text-white">
-            <tr>
-              <th className="px-3 py-2 text-left">Concepto</th>
-              <th className="px-3 py-2 text-right w-20">Cant.</th>
-              <th className="px-3 py-2 text-right">Costo unit.</th>
-              <th className="px-3 py-2 text-right">Costo total</th>
-              <th className="px-3 py-2 text-right">Valor unit.</th>
-              <th className="px-3 py-2 text-right">Valor total</th>
+    <div className="mb-6 last:mb-0">
+      <h3 className="font-semibold mb-2 text-azul text-sm">{titulo}</h3>
+      <div className="overflow-x-auto border border-[#e5e7eb] rounded-xl">
+        <table className="w-full text-sm bg-white">
+          <thead>
+            <tr className="bg-azul text-white text-left">
+              <th className="px-3 py-2 font-semibold">Concepto</th>
+              <th className="px-3 py-2 text-right w-20 font-semibold">Cant.</th>
+              <th className="px-3 py-2 text-right font-semibold">Costo unit.</th>
+              <th className="px-3 py-2 text-right font-semibold">Costo total</th>
+              <th className="px-3 py-2 text-right font-semibold">Valor unit.</th>
+              <th className="px-3 py-2 text-right font-semibold">Valor total</th>
             </tr>
           </thead>
           <tbody>
             {filas.map((f, idx) => (
-              <tr key={idx} className="border-t">
+              <tr key={idx} className="border-b border-[#f0f1f3] last:border-0">
                 <td className="px-3 py-2 font-medium">{f.descripcion}</td>
                 <td className="px-3 py-2 text-right">{f.cantidad}</td>
-                <td className="px-3 py-2 text-right">{formato(f.costo_unit)}</td>
+                <td className="px-3 py-2 text-right text-gray-600">{formato(f.costo_unit)}</td>
                 <td className="px-3 py-2 text-right font-medium">{formato(f.costo_total)}</td>
-                <td className="px-3 py-2 text-right">{formato(f.valor_unit)}</td>
-                <td className="px-3 py-2 text-right font-medium" style={{ color: "#00369C" }}>{formato(f.valor_total)}</td>
+                <td className="px-3 py-2 text-right text-gray-600">{formato(f.valor_unit)}</td>
+                <td className="px-3 py-2 text-right font-semibold text-azul">{formato(f.valor_total)}</td>
               </tr>
             ))}
           </tbody>
