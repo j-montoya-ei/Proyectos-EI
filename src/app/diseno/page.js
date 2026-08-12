@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 import ImportarDatos from "../../components/ImportarDatos";
+import { Boton, Input, Card, Tabla, Celda, PageHeader } from "../../components/ui";
 
 export default function DisenoPage() {
   const [items, setItems] = useState([]);
@@ -68,114 +69,59 @@ export default function DisenoPage() {
   );
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6" style={{ color: "#00369C" }}>
-        Diseño y trámites
-      </h1>
+    <div className="max-w-6xl mx-auto">
+      <PageHeader titulo="Diseño y trámites" subtitulo="Catálogo de diseño y trámites" />
 
-<ImportarDatos tabla="diseno" onImport={cargar}
-  columnas={[{ campo: "descripcion", tipo: "texto" }, { campo: "ume", tipo: "texto" }, { campo: "costo", tipo: "numero" }]} />
-          
-      <div className="bg-white border rounded-lg p-4 mb-6 flex flex-wrap gap-3 items-end">
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">Descripción *</label>
-          <input
-            className="border rounded px-3 py-2"
-            value={form.descripcion}
-            onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-            placeholder="Ej: Diseño eléctrico"
-          />
+      <Card className="p-4 mb-5 animate-slide-up">
+        <ImportarDatos
+          tabla="diseno"
+          onImport={cargar}
+          columnas={[
+            { campo: "descripcion", tipo: "texto" },
+            { campo: "ume", tipo: "texto" },
+            { campo: "costo", tipo: "numero" },
+          ]}
+        />
+        <div className="flex flex-wrap gap-3 items-end pt-1">
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-xs font-medium text-gray-500 mb-1">Descripción *</label>
+            <Input className="w-full" value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} placeholder="Ej: Diseño eléctrico" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">UME</label>
+            <Input className="w-24" value={form.ume} onChange={(e) => setForm({ ...form, ume: e.target.value })} placeholder="glb, un" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Costo base</label>
+            <Input type="number" className="w-40" value={form.costo} onChange={(e) => setForm({ ...form, costo: e.target.value })} placeholder="0" />
+          </div>
+          <Boton onClick={guardar}>{editId ? "Actualizar" : "Agregar"}</Boton>
+          {editId && <Boton variant="secondary" onClick={cancelar}>Cancelar</Boton>}
         </div>
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">UME</label>
-          <input
-            className="border rounded px-3 py-2 w-24"
-            value={form.ume}
-            onChange={(e) => setForm({ ...form, ume: e.target.value })}
-            placeholder="glb, un"
-          />
-        </div>
-        <div>
-          <label className="block text-sm text-gray-600 mb-1">Costo base</label>
-          <input
-            type="number"
-            className="border rounded px-3 py-2"
-            value={form.costo}
-            onChange={(e) => setForm({ ...form, costo: e.target.value })}
-            placeholder="0"
-          />
-        </div>
-        <button
-          onClick={guardar}
-          className="px-5 py-2 rounded font-semibold text-white"
-          style={{ backgroundColor: "#00369C" }}
-        >
-          {editId ? "Actualizar" : "Agregar"}
-        </button>
-        {editId && (
-          <button
-            onClick={cancelar}
-            className="px-5 py-2 rounded font-semibold"
-            style={{ backgroundColor: "#A4A8AB", color: "white" }}
-          >
-            Cancelar
-          </button>
-        )}
-      </div>
+      </Card>
 
-      <input
-        className="border rounded px-3 py-2 w-full mb-4"
-        placeholder="Buscar por descripción o UME..."
-        value={busqueda}
-        onChange={(e) => setBusqueda(e.target.value)}
-      />
+      <Input className="w-full mb-4" placeholder="Buscar por descripción o UME..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
 
       {cargando ? (
-        <p className="text-gray-500">Cargando...</p>
+        <div className="skeleton h-64 rounded-xl" />
+      ) : filtrados.length === 0 ? (
+        <Card className="p-10 text-center text-gray-400 text-sm animate-slide-up">Sin registros aún.</Card>
       ) : (
-        <div className="overflow-x-auto border rounded-lg">
-          <table className="w-full text-sm">
-            <thead style={{ backgroundColor: "#00369C" }} className="text-white">
-              <tr>
-                <th className="px-4 py-2 text-left">Descripción</th>
-                <th className="px-4 py-2 text-left">UME</th>
-                <th className="px-4 py-2 text-right">Costo base</th>
-                <th className="px-4 py-2 text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtrados.map((r) => (
-                <tr key={r.id} className="border-t hover:bg-gray-50">
-                  <td className="px-4 py-2 font-medium">{r.descripcion}</td>
-                  <td className="px-4 py-2">{r.ume}</td>
-                  <td className="px-4 py-2 text-right">{formato(r.costo)}</td>
-                  <td className="px-4 py-2 text-center">
-                    <button
-                      onClick={() => editar(r)}
-                      className="px-3 py-1 rounded mr-2 font-semibold"
-                      style={{ backgroundColor: "#F6D000" }}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => eliminar(r.id)}
-                      className="px-3 py-1 rounded font-semibold text-white bg-red-600"
-                    >
-                      Eliminar
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filtrados.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-gray-500">
-                    Sin registros aún.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <Tabla columnas={["Descripción", "UME", <span key="c" className="block text-right">Costo base</span>, <span key="a" className="block text-center">Acciones</span>]}>
+          {filtrados.map((r) => (
+            <tr key={r.id} className="border-b border-[#f0f1f3] last:border-0 hover:bg-[#f9fafb] transition-colors">
+              <Celda className="font-medium">{r.descripcion}</Celda>
+              <Celda className="text-gray-600">{r.ume}</Celda>
+              <Celda className="text-right font-semibold text-azul whitespace-nowrap">{formato(r.costo)}</Celda>
+              <Celda>
+                <div className="flex gap-2 justify-center">
+                  <Boton size="sm" variant="warning" onClick={() => editar(r)}>Editar</Boton>
+                  <Boton size="sm" variant="danger" onClick={() => eliminar(r.id)}>Eliminar</Boton>
+                </div>
+              </Celda>
+            </tr>
+          ))}
+        </Tabla>
       )}
     </div>
   );
