@@ -66,7 +66,7 @@ export default function Planeacion() {
   }, []);
 
   async function crear() {
-    if (!f.nombre.trim()) { alert("Escribe un nombre u OT."); return; }
+    if (!f.nombre.trim()) { alert("Escribe un nombre."); return; }
     const payload = {
       nombre: f.nombre.trim(),
       cliente_id: f.cliente_id ? Number(f.cliente_id) : null,
@@ -140,9 +140,9 @@ export default function Planeacion() {
         <Card className="p-5 mb-6 animate-slide-up">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-gray-500">Nombre / OT</label>
+              <label className="text-xs font-semibold text-gray-500">Nombre</label>
               <Input value={f.nombre} onChange={(e) => setF({ ...f, nombre: e.target.value })}
-                placeholder="OT-2451 · Subestación Norte" />
+                placeholder="PR-2451 · Subestación Norte" />
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-gray-500">Cliente</label>
