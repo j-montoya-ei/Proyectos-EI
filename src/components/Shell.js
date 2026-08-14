@@ -10,9 +10,10 @@ const PUNTOS = [
   [175, 360, "g"],
 ];
 const COLOR = { g: "#A4A8AB", y: "#F6D000", w: "#FFFFFF" };
+const COLOR_LIGHT = { g: "#00369C", y: "#F6D000", w: "#00369C" };
 
 const NAV = [
-  { href: "/", label: "Inicio", icon: "home" },
+  { href: "/construccion", label: "Inicio", icon: "home" },
   { href: "/clientes", label: "Clientes", icon: "users" },
   { href: "/presupuesto", label: "Presupuestos", icon: "doc" },
   { href: "/apus", label: "APUs", icon: "layers" },
@@ -42,6 +43,18 @@ function Icon({ name }) {
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d={PATHS[name]} />
+    </svg>
+  );
+}
+
+function DotLogo({ mapa }) {
+  return (
+    <svg viewBox="20 30 380 370" width="30" height="30" className="shrink-0">
+      {PUNTOS.map(([x, y, c], i) => (
+        <circle key={i} cx={x} cy={y} r="34" fill={mapa[c]}
+          className="animate-scale-in origin-center"
+          style={{ animationDelay: `${i * 0.05}s`, transformBox: "fill-box", transformOrigin: "center" }} />
+      ))}
     </svg>
   );
 }
@@ -99,62 +112,68 @@ export default function Shell({ children }) {
     );
   if (!sesion) return null;
 
-  const activo = (href) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+  const activo = (href) => pathname.startsWith(href);
+  const conSidebar = !(pathname === "/" || pathname.startsWith("/planeacion"));
 
   return (
     <div className="flex min-h-screen">
-      {menuAbierto && (
+      {conSidebar && menuAbierto && (
         <div onClick={() => setMenuAbierto(false)}
           className="fixed inset-0 bg-black/40 z-30 md:hidden" />
       )}
 
-      <aside
-        style={{ background: "linear-gradient(180deg,#00369C 0%,#002c82 100%)" }}
-        className={`w-[248px] shrink-0 text-white flex flex-col fixed md:static inset-y-0 left-0 z-40
-          transition-transform duration-300 md:translate-x-0
-          ${menuAbierto ? "translate-x-0" : "-translate-x-full"}`}
-      >
-        <div className="flex items-center gap-2.5 px-6 pt-7 pb-8 group">
-          <svg viewBox="20 30 380 370" width="34" height="34" className="shrink-0">
-            {PUNTOS.map(([x, y, c], i) => (
-              <circle key={i} cx={x} cy={y} r="34" fill={COLOR[c]}
-                className="animate-scale-in origin-center transition-transform duration-300 group-hover:scale-110"
-                style={{ animationDelay: `${i * 0.05}s`, transformBox: "fill-box", transformOrigin: "center" }} />
-            ))}
-          </svg>
-          <span className="text-[19px] font-extrabold tracking-tight leading-none">
-            electro<span className="text-amarillo">ingeniería</span>
-          </span>
-        </div>
+      {conSidebar && (
+        <aside
+          style={{ background: "linear-gradient(180deg,#00369C 0%,#002c82 100%)" }}
+          className={`w-[248px] shrink-0 text-white flex flex-col fixed md:static inset-y-0 left-0 z-40
+            transition-transform duration-300 md:translate-x-0
+            ${menuAbierto ? "translate-x-0" : "-translate-x-full"}`}
+        >
+          <a href="/" className="flex items-center gap-2.5 px-6 pt-7 pb-8 group">
+            <DotLogo mapa={COLOR} />
+            <span className="text-[19px] font-extrabold tracking-tight leading-none">
+              electro<span className="text-amarillo">ingeniería</span>
+            </span>
+          </a>
 
-        <nav className="flex flex-col gap-1 px-3 overflow-y-auto pb-6">
-          {NAV.map((n) => {
-            const on = activo(n.href);
-            return (
-              <a key={n.href} href={n.href}
-                className={`group relative flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium
-                  transition-all duration-200
-                  ${on ? "bg-white/15 text-white" : "text-white/75 hover:bg-white/10 hover:text-white"}`}
-              >
-                {on && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-full bg-amarillo" />}
-                <span className={`transition-transform duration-200 ${on ? "" : "group-hover:translate-x-0.5"}`}>
-                  <Icon name={n.icon} />
-                </span>
-                {n.label}
-              </a>
-            );
-          })}
-        </nav>
-      </aside>
+          <nav className="flex flex-col gap-1 px-3 overflow-y-auto pb-6">
+            {NAV.map((n) => {
+              const on = activo(n.href);
+              return (
+                <a key={n.href} href={n.href}
+                  className={`group relative flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium
+                    transition-all duration-200
+                    ${on ? "bg-white/15 text-white" : "text-white/75 hover:bg-white/10 hover:text-white"}`}
+                >
+                  {on && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-full bg-amarillo" />}
+                  <span className={`transition-transform duration-200 ${on ? "" : "group-hover:translate-x-0.5"}`}>
+                    <Icon name={n.icon} />
+                  </span>
+                  {n.label}
+                </a>
+              );
+            })}
+          </nav>
+        </aside>
+      )}
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-14 bg-white border-b border-[#e5e7eb] flex items-center px-4 md:px-6 gap-3 sticky top-0 z-20">
-          <button onClick={() => setMenuAbierto(true)}
-            className="md:hidden p-2 -ml-1 rounded-lg hover:bg-gray-100 text-gray-600" aria-label="Menú">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M3 6h18M3 12h18M3 18h18" />
-            </svg>
-          </button>
+          {conSidebar ? (
+            <button onClick={() => setMenuAbierto(true)}
+              className="md:hidden p-2 -ml-1 rounded-lg hover:bg-gray-100 text-gray-600" aria-label="Menú">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M3 6h18M3 12h18M3 18h18" />
+              </svg>
+            </button>
+          ) : (
+            <a href="/" className="flex items-center gap-2.5 group">
+              <DotLogo mapa={COLOR_LIGHT} />
+              <span className="text-[17px] font-extrabold tracking-tight leading-none text-[#00369C]">
+                electro<span className="text-[#1a1a1a]">ingeniería</span>
+              </span>
+            </a>
+          )}
 
           <div className="flex-1" />
 
